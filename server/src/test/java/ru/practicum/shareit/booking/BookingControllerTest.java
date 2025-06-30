@@ -83,7 +83,7 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.status", is("WAITING")));
     }
 
-    /*
+/*
     @Test
     void getBooking_BookingNotFound_ShouldReturnNotFound() throws Exception {
         Long userId = 1L;
@@ -96,7 +96,7 @@ class BookingControllerTest {
                         .header(USER_ID_HEADER, userId))
                 .andExpect(status().isNotFound());
     }
-     */
+ */
 
     @Test
     void getBookings_ValidRequest_ShouldReturnBookingsList() throws Exception {

@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-//import ru.practicum.shareit.item.comment.CommentDto;
+import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-//import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -120,8 +120,6 @@ public class ItemServiceImplTest {
         assertThat(result.get(0).getComments()).extracting("text").containsExactly("Great book");
     }
 
-
-    /*
     @Test
     void addCommentShouldSucceedOnlyAfterPastBooking() {
         LocalDateTime now = LocalDateTime.now();
@@ -141,11 +139,10 @@ public class ItemServiceImplTest {
 
         // без завершённого бронирования
         CommentDto badDto = new CommentDto(null, "Bad book", "Anton", null);
-        assertThrows(ResponseStatusException.class,
+        assertThrows(RuntimeException.class,
                 () -> itemService.addComment(owner.getId(), item.getId(), badDto)
         );
     }
-     */
 
     @Test
     void getByIdShouldReturnComments() {
