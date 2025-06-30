@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class ItemRequestRepositoryIntegrationTest {
+public class ItemRequestRepositoryTest {
 
     @Autowired
     private ItemRequestRepository itemRequestRepository;

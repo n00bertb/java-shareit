@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestPropertySource(properties = "db.name=test")
 @Transactional
-class BookingServiceImplIntegrationTest {
+class BookingServiceImplTest {
 
     @Autowired
     private BookingService bookingService;
