@@ -12,7 +12,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.exception.AccessDeniedException;
-import ru.practicum.shareit.exception.BookingNotFoundException;
+//import ru.practicum.shareit.exception.BookingNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
