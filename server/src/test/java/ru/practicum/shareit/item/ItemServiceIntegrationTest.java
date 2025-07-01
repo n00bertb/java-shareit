@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.status.BookingStatus;
+import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -125,7 +126,7 @@ class ItemServiceIntegrationTest {
 
         assertThatThrownBy(() -> itemService.createItem(999L, itemDto))
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessage("Владелец не найден");
+                .hasMessage("Собственник не найден");
     }
 
     @Test
@@ -137,7 +138,7 @@ class ItemServiceIntegrationTest {
 
         assertThatThrownBy(() -> itemService.createItem(owner.getId(), itemDto))
                 .isInstanceOf(ValidationException.class)
-                .hasMessage("Имя предмета не может быть пустым или null");
+                .hasMessage("Название предмета не может быть пустым или null");
     }
 
     @Test
@@ -255,6 +256,128 @@ class ItemServiceIntegrationTest {
         assertThatThrownBy(() -> itemService.addComment(booker.getId(), item.getId(), commentDto))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Вы можете комментировать только те предметы, которые бронировали");
+    }
+
+    // Тесты для проверки доступа при обновлении предмета
+    @Test
+    void updateItem_WithNonOwnerUser_ShouldThrowAccessDeniedException() {
+        Item item = createTestItem();
+
+        ItemDto updateDto = new ItemDto();
+        updateDto.setName("Updated Name");
+
+        assertThatThrownBy(() -> itemService.updateItem(booker.getId(), item.getId(), updateDto))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Только собственник может редактировать предмет");
+    }
+
+    // Тесты для валидации при обновлении предмета
+    @Test
+    void updateItem_WithEmptyName_ShouldThrowValidationException() {
+        Item item = createTestItem();
+
+        ItemDto updateDto = new ItemDto();
+        updateDto.setName("   "); // Пустое название с пробелами
+
+        assertThatThrownBy(() -> itemService.updateItem(owner.getId(), item.getId(), updateDto))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Название предмета не может быть пустым");
+    }
+
+    @Test
+    void updateItem_WithEmptyDescription_ShouldThrowValidationException() {
+        Item item = createTestItem();
+
+        ItemDto updateDto = new ItemDto();
+        updateDto.setDescription("   "); // Пустое описание с пробелами
+
+        assertThatThrownBy(() -> itemService.updateItem(owner.getId(), item.getId(), updateDto))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Описание предмета не может быть пустым");
+    }
+
+    @Test
+    void updateItem_WithRequestId_ShouldUpdateRequestId() {
+        Item item = createTestItem();
+
+        ItemDto updateDto = new ItemDto();
+        updateDto.setRequestId(itemRequest.getId());
+
+        ItemDto result = itemService.updateItem(owner.getId(), item.getId(), updateDto);
+
+        assertThat(result.getRequestId()).isEqualTo(itemRequest.getId());
+
+        Item updatedItem = itemRepository.findById(item.getId()).orElse(null);
+        assertThat(updatedItem).isNotNull();
+        assertThat(updatedItem.getRequestId()).isEqualTo(itemRequest.getId());
+    }
+
+    // Тесты для валидации при создании предмета
+    @Test
+    void createItem_WithNullItemDto_ShouldThrowValidationException() {
+        assertThatThrownBy(() -> itemService.createItem(owner.getId(), null))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Предмет не может быть null");
+    }
+
+    @Test
+    void createItem_WithNullUserId_ShouldThrowUserNotFoundException() {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Test Item");
+        itemDto.setDescription("Test Description");
+        itemDto.setAvailable(true);
+
+        assertThatThrownBy(() -> itemService.createItem(null, itemDto))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("Собственник не может быть null");
+    }
+
+    @Test
+    void createItem_WithNullName_ShouldThrowValidationException() {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName(null);
+        itemDto.setDescription("Test Description");
+        itemDto.setAvailable(true);
+
+        assertThatThrownBy(() -> itemService.createItem(owner.getId(), itemDto))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Название предмета не может быть пустым или null");
+    }
+
+    @Test
+    void createItem_WithNullDescription_ShouldThrowValidationException() {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Test Item");
+        itemDto.setDescription(null);
+        itemDto.setAvailable(true);
+
+        assertThatThrownBy(() -> itemService.createItem(owner.getId(), itemDto))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Описание предмета не может быть пустым или null");
+    }
+
+    @Test
+    void createItem_WithEmptyDescription_ShouldThrowValidationException() {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Test Item");
+        itemDto.setDescription("   "); // Пустое описание с пробелами
+        itemDto.setAvailable(true);
+
+        assertThatThrownBy(() -> itemService.createItem(owner.getId(), itemDto))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Описание предмета не может быть пустым или null");
+    }
+
+    @Test
+    void createItem_WithNullAvailable_ShouldThrowValidationException() {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Test Item");
+        itemDto.setDescription("Test Description");
+        itemDto.setAvailable(null);
+
+        assertThatThrownBy(() -> itemService.createItem(owner.getId(), itemDto))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Статус доступности предмета не может быть null");
     }
 
     private Item createTestItem() {

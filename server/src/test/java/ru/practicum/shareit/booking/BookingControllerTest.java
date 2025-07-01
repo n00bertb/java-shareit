@@ -12,7 +12,6 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.exception.AccessDeniedException;
-//import ru.practicum.shareit.exception.BookingNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -82,21 +81,6 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.status", is("WAITING")));
     }
-
-/*
-    @Test
-    void getBooking_BookingNotFound_ShouldReturnNotFound() throws Exception {
-        Long userId = 1L;
-        Long bookingId = 999L;
-
-        when(bookingService.getBookingById(userId, bookingId))
-                .thenThrow(new BookingNotFoundException("Бронирование не найдено"));
-
-        mockMvc.perform(get("/bookings/{bookingId}", bookingId)
-                        .header(USER_ID_HEADER, userId))
-                .andExpect(status().isNotFound());
-    }
- */
 
     @Test
     void getBookings_ValidRequest_ShouldReturnBookingsList() throws Exception {
