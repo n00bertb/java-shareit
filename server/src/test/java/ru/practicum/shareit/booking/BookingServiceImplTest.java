@@ -227,6 +227,161 @@ class BookingServiceImplTest {
         assertThat(result).hasSize(1);
     }
 
+    @Test
+    void updateBookingStatus_AlreadyApproved_ShouldThrowException() {
+        Booking booking = createTestBooking();
+        booking.setStatus(BookingStatus.APPROVED);
+        booking = bookingRepository.save(booking);
+
+        Booking finalBooking = booking;
+        assertThrows(AccessDeniedException.class,
+                () -> bookingService.updateBookingStatus(owner.getId(), finalBooking.getId(), false));
+    }
+
+    @Test
+    void updateBookingStatus_AlreadyRejected_ShouldThrowException() {
+        Booking booking = createTestBooking();
+        booking.setStatus(BookingStatus.REJECTED);
+        booking = bookingRepository.save(booking);
+
+        Booking finalBooking = booking;
+        assertThrows(AccessDeniedException.class,
+                () -> bookingService.updateBookingStatus(owner.getId(), finalBooking.getId(), true));
+    }
+
+    @Test
+    void getBookingsByUser_CurrentStatus_ShouldReturnCurrentBookings() {
+        Booking currentBooking = new Booking();
+        currentBooking.setStart(LocalDateTime.now().minusHours(1)); // started 1 hour ago
+        currentBooking.setEnd(LocalDateTime.now().plusHours(1));    // ends in 1 hour
+        currentBooking.setItem(item);
+        currentBooking.setBooker(booker);
+        currentBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(currentBooking);
+
+        List<BookingDto> result = bookingService.getBookingsByUser(booker.getId(), BookingStatus.CURRENT);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStart()).isBefore(LocalDateTime.now());
+        assertThat(result.get(0).getEnd()).isAfter(LocalDateTime.now());
+    }
+
+    @Test
+    void getBookingsByUser_PastStatus_ShouldReturnPastBookings() {
+        Booking pastBooking = new Booking();
+        pastBooking.setStart(LocalDateTime.now().minusHours(3));
+        pastBooking.setEnd(LocalDateTime.now().minusHours(1));
+        pastBooking.setItem(item);
+        pastBooking.setBooker(booker);
+        pastBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(pastBooking);
+
+        List<BookingDto> result = bookingService.getBookingsByUser(booker.getId(), BookingStatus.PAST);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getEnd()).isBefore(LocalDateTime.now());
+    }
+
+    @Test
+    void getBookingsByUser_FutureStatus_ShouldReturnFutureBookings() {
+        Booking futureBooking = new Booking();
+        futureBooking.setStart(LocalDateTime.now().plusHours(2));
+        futureBooking.setEnd(LocalDateTime.now().plusHours(3));
+        futureBooking.setItem(item);
+        futureBooking.setBooker(booker);
+        futureBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(futureBooking);
+
+        List<BookingDto> result = bookingService.getBookingsByUser(booker.getId(), BookingStatus.FUTURE);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStart()).isAfter(LocalDateTime.now());
+    }
+
+    @Test
+    void getBookingsByUser_RejectedStatus_ShouldReturnRejectedBookings() {
+        Booking rejectedBooking = createTestBooking();
+        rejectedBooking.setStatus(BookingStatus.REJECTED);
+        bookingRepository.save(rejectedBooking);
+
+        List<BookingDto> result = bookingService.getBookingsByUser(booker.getId(), BookingStatus.REJECTED);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStatus()).isEqualTo(BookingStatus.REJECTED);
+    }
+
+    @Test
+    void getBookingsByOwner_CurrentStatus_ShouldReturnCurrentBookings() {
+        Booking currentBooking = new Booking();
+        currentBooking.setStart(LocalDateTime.now().minusHours(1)); // started 1 hour ago
+        currentBooking.setEnd(LocalDateTime.now().plusHours(1));    // ends in 1 hour
+        currentBooking.setItem(item);
+        currentBooking.setBooker(booker);
+        currentBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(currentBooking);
+
+        List<BookingDto> result = bookingService.getBookingsByOwner(owner.getId(), BookingStatus.CURRENT);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStart()).isBefore(LocalDateTime.now());
+        assertThat(result.get(0).getEnd()).isAfter(LocalDateTime.now());
+    }
+
+    @Test
+    void getBookingsByOwner_PastStatus_ShouldReturnPastBookings() {
+        Booking pastBooking = new Booking();
+        pastBooking.setStart(LocalDateTime.now().minusHours(3));
+        pastBooking.setEnd(LocalDateTime.now().minusHours(1));
+        pastBooking.setItem(item);
+        pastBooking.setBooker(booker);
+        pastBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(pastBooking);
+
+        List<BookingDto> result = bookingService.getBookingsByOwner(owner.getId(), BookingStatus.PAST);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getEnd()).isBefore(LocalDateTime.now());
+    }
+
+    @Test
+    void getBookingsByOwner_FutureStatus_ShouldReturnFutureBookings() {
+        Booking futureBooking = new Booking();
+        futureBooking.setStart(LocalDateTime.now().plusHours(2));
+        futureBooking.setEnd(LocalDateTime.now().plusHours(3));
+        futureBooking.setItem(item);
+        futureBooking.setBooker(booker);
+        futureBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(futureBooking);
+
+        List<BookingDto> result = bookingService.getBookingsByOwner(owner.getId(), BookingStatus.FUTURE);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStart()).isAfter(LocalDateTime.now());
+    }
+
+    @Test
+    void getBookingsByOwner_WaitingStatus_ShouldReturnWaitingBookings() {
+        Booking waitingBooking = createTestBooking();
+        bookingRepository.save(waitingBooking);
+
+        List<BookingDto> result = bookingService.getBookingsByOwner(owner.getId(), BookingStatus.WAITING);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStatus()).isEqualTo(BookingStatus.WAITING);
+    }
+
+    @Test
+    void getBookingsByOwner_RejectedStatus_ShouldReturnRejectedBookings() {
+        Booking rejectedBooking = createTestBooking();
+        rejectedBooking.setStatus(BookingStatus.REJECTED);
+        bookingRepository.save(rejectedBooking);
+
+        List<BookingDto> result = bookingService.getBookingsByOwner(owner.getId(), BookingStatus.REJECTED);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStatus()).isEqualTo(BookingStatus.REJECTED);
+    }
+
     private Booking createTestBooking() {
         Booking booking = new Booking();
         booking.setStart(LocalDateTime.now().plusHours(1));
