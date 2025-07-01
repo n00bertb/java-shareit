@@ -16,7 +16,7 @@ public class ItemClient extends BaseClient {
 
     private static final String API_PREFIX = "/items";
 
-    public ItemClient(RestTemplateBuilder builder, @Value("${shareit-server.url}") String serverUrl) {
+    public ItemClient(RestTemplateBuilder builder, @Value("${shareit-server.url:http://localhost:9090}") String serverUrl) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
