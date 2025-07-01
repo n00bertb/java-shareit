@@ -126,7 +126,7 @@ class ItemServiceIntegrationTest {
 
         assertThatThrownBy(() -> itemService.createItem(999L, itemDto))
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessage("Собственник не найден");
+                .hasMessage("Владелец не найден");
     }
 
     @Test
@@ -138,7 +138,7 @@ class ItemServiceIntegrationTest {
 
         assertThatThrownBy(() -> itemService.createItem(owner.getId(), itemDto))
                 .isInstanceOf(ValidationException.class)
-                .hasMessage("Название предмета не может быть пустым или null");
+                .hasMessage("Имя предмета не может быть пустым или null");
     }
 
     @Test
@@ -268,7 +268,7 @@ class ItemServiceIntegrationTest {
 
         assertThatThrownBy(() -> itemService.updateItem(booker.getId(), item.getId(), updateDto))
                 .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Только собственник может редактировать предмет");
+                .hasMessage("Только владелец может редактировать предмет");
     }
 
     // Тесты для валидации при обновлении предмета
@@ -281,7 +281,7 @@ class ItemServiceIntegrationTest {
 
         assertThatThrownBy(() -> itemService.updateItem(owner.getId(), item.getId(), updateDto))
                 .isInstanceOf(ValidationException.class)
-                .hasMessage("Название предмета не может быть пустым");
+                .hasMessage("Имя предмета не может быть пустым");
     }
 
     @Test
@@ -329,7 +329,7 @@ class ItemServiceIntegrationTest {
 
         assertThatThrownBy(() -> itemService.createItem(null, itemDto))
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessage("Собственник не может быть null");
+                .hasMessage("Владелец не может быть null");
     }
 
     @Test
@@ -341,7 +341,7 @@ class ItemServiceIntegrationTest {
 
         assertThatThrownBy(() -> itemService.createItem(owner.getId(), itemDto))
                 .isInstanceOf(ValidationException.class)
-                .hasMessage("Название предмета не может быть пустым или null");
+                .hasMessage("Имя предмета не может быть пустым или null");
     }
 
     @Test
@@ -377,7 +377,7 @@ class ItemServiceIntegrationTest {
 
         assertThatThrownBy(() -> itemService.createItem(owner.getId(), itemDto))
                 .isInstanceOf(ValidationException.class)
-                .hasMessage("Статус доступности предмета не может быть null");
+                .hasMessage("Статус предмета не может быть null");
     }
 
     private Item createTestItem() {
